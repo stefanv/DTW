@@ -30,11 +30,11 @@ class DTW():
 			return self._dist_matrix[2+p, 2+q]
 
 		if self.case == DTW.CASE1:
-			min_p, min_q = min((p-1, q), (p, q-1), (p-1, q-1), key=lambda x: self.dp_backwards(*x))
+			min_p, min_q = min((p-2, q-1), (p-1, q-1), (p-1, q-2), key=lambda x: self.dp_backwards(*x))
 		elif self.case == DTW.CASE2:
-			min_p, min_q = min((p-2, q-1), (p-1, q-2), (p-1, q-1), key=lambda x: self.dp_backwards(*x))
+			min_p, min_q = min((p-1, q), (p-1, q-1), (p, q-1), key=lambda x: self.dp_backwards(*x))
 		elif self.case == DTW.CASE3:
-			min_p, min_q = min((p-1, q), (p, q-1), (p-2, q-1), (p-1, q-2), (p-1, q-1), key=lambda x: self.dp_backwards(*x))
+			min_p, min_q = min((p-2, q-1), (p-1, q), (p-1, q-1), (p, q-1), (p-1, q-2), key=lambda x: self.dp_backwards(*x))
 
 		self._dist_matrix[2+p, 2+q] = self._dist_func(self._seq1[p], self._seq2[q]) + self.dp_backwards(min_p, min_q)
 
@@ -54,11 +54,11 @@ class DTW():
 			path.append((p, q))
 
 			if self.case == DTW.CASE1:
-				min_p, min_q = min((p-1, q), (p, q-1), (p-1, q-1), key=lambda x: self.dp_backwards(*x))
+				min_p, min_q = min((p-2, q-1), (p-1, q-1), (p-1, q-2), key=lambda x: self.dp_backwards(*x))
 			elif self.case == DTW.CASE2:
-				min_p, min_q = min((p-2, q-1), (p-1, q-2), (p-1, q-1), key=lambda x: self.dp_backwards(*x))
+				min_p, min_q = min((p-1, q), (p-1, q-1), (p, q-1), key=lambda x: self.dp_backwards(*x))
 			elif self.case == DTW.CASE3:
-				min_p, min_q = min((p-1, q), (p, q-1), (p-2, q-1), (p-1, q-2), (p-1, q-1), key=lambda x: self.dp_backwards(*x))
+				min_p, min_q = min((p-2, q-1), (p-1, q), (p-1, q-1), (p, q-1), (p-1, q-2), key=lambda x: self.dp_backwards(*x))
 
 			p, q = min_p, min_q
 
@@ -74,15 +74,14 @@ if __name__ == '__main__':
 	np.set_printoptions(threshold=np.nan)
 	np.set_printoptions(linewidth=np.nan)
 
-	vec1=[69, 73, 80, 75, 79, 80, 79, 78, 76, 73, 71, 70, 70, 69, 69, 71, 73, 75, 76, 76, 76, 76, 76, 75, 73, 71, 70, 70, 71, 73, 75, 80, 80, 80, 78]
-	vec2=[71, 73, 75, 80, 78, 75, 71, 75, 73, 71, 72, 75, 76, 76, 76, 76, 75, 73, 78, 79, 80, 80, 78]
+	vec1=[71, 73, 75, 80, 80, 80, 78, 76, 75, 73, 71, 71, 71, 73, 75, 76, 76, 68, 76, 76, 75, 73, 71, 70, 70, 69, 68, 68, 72, 74, 78, 79, 80, 80, 78];
+	vec2=[69, 69, 73, 75, 79, 80, 79, 78, 76, 73, 72, 71, 70, 70, 69, 69, 69, 71, 73, 75, 76, 76, 76, 76, 76, 75, 73, 71, 70, 70, 71, 73, 75, 80, 80, 80, 78];
 
-	if len(vec1) > len(vec2):
-		t = np.array(vec1)
-		r = np.array(vec2)
-	else:
-		t = np.array(vec2)
-		r = np.array(vec1)
+#	vec1=[69, 73, 80, 75, 79, 80, 79, 78, 76, 73, 71, 70, 70, 69, 69, 71, 73, 75, 76, 76, 76, 76, 76, 75, 73, 71, 70, 70, 71, 73, 75, 80, 80, 80, 78]
+#	vec2=[71, 73, 75, 80, 78, 75, 71, 75, 73, 71, 72, 75, 76, 76, 76, 76, 75, 73, 78, 79, 80, 80, 78]
+
+	t = np.array(vec1)
+	r = np.array(vec2)
 
 	f1 = plt.figure()
 	f2 = plt.figure()
@@ -122,4 +121,4 @@ if __name__ == '__main__':
 
 	plt.show()
 
-True
+	True
