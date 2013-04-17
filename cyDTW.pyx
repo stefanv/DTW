@@ -1,3 +1,10 @@
+# cython: boundscheck=False
+# cython: cdivision=True
+# cython: nonecheck=False
+# cython: wraparound=False
+
+from __future__ import division
+
 cdef extern from "float.h":
     double DBL_MAX
 
@@ -62,23 +69,28 @@ def dtw(double[:] x, double[:] y, int case=1):
         int m = len(x)
         int n = len(y)
         double[:, ::1] distance
-        int i, j, min_i, min_j
+        Py_ssize_t i, j, min_i, min_j
         double[3] costs
-        double prev_cost
+
+    if len(x) > 2 * len(y) or len(y) > 2 * len(x):
+        raise ValueError("Sequence lengths cannot differ by more than 50%.")
 
     distance = np.zeros((m + 1, n + 1)) + DBL_MAX
     distance[1, 1] = 0
 
     # Step forward
-    for i in range(2, m + 1):
-        for j in range(2, n + 1):
-            # Could limit the fan here and save some time
+    for i in range(1, m):
+        for j in range(1, n):
 
-            costs[0] = distance[i - 1, j - 1]
-            costs[1] = distance[i - 2, j - 1]
-            costs[2] = distance[i - 1, j - 2]
+            # Could save some minor cost by limiting calculation to fan
+            ## if ((j <= 2 * i) and (i <= 2 * j) and (2 * (n - j) >= (m - i)) and \
+            ##     ((n - j) <= 2 * (m - i))):
 
-            distance[i, j] = euclidean(x[i - 1], y[j - 1]) + min3(costs)
+            costs[0] = distance[i, j]
+            costs[1] = distance[i - 1, j]
+            costs[2] = distance[i, j - 1]
+
+            distance[i + 1, j + 1] = euclidean(x[i], y[j]) + min3(costs)
 
     # Trace back
     cdef list path = [(m - 1, n - 1)]
