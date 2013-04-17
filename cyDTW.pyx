@@ -1,3 +1,8 @@
+# cython: boundscheck=False
+# cython: cdivision=True
+# cython: nonecheck=False
+# cython: wraparound=False
+
 __author__ = 'marcdeklerk'
 
 cdef extern from "float.h":
@@ -60,7 +65,7 @@ cdef class DTW:
         self._dist_matrix[0:2, 2:seq2.shape[0]+2] = DBL_MAX
         self._dist_matrix[0:2, 0:2] = 0
 
-    cdef double dp_backwards(self, int p, int q) except *:
+    cdef inline double dp_backwards(self, int p, int q) except *:
         if p == 0 and q == 0:
             pass
 
@@ -127,5 +132,5 @@ cdef class DTW:
 
         return path
 
-    cdef double distance(self, double x, double y):
+    cdef inline double distance(self, double x, double y):
         return x-y if x > y else y -x
