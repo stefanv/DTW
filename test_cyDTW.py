@@ -1,16 +1,19 @@
 __author__ = 'marcdeklerk'
 
 from cyDTW import DTW
-
 import numpy as np
+import numpy.random as npr
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 np.set_printoptions(threshold=np.nan)
 np.set_printoptions(linewidth=np.nan)
 
-vec1=[71, 73, 75, 80, 80, 80, 78, 76, 75, 73, 71, 71, 71, 73, 75, 76, 76, 68, 76, 76, 75, 73, 71, 70, 70, 69, 68, 68, 72, 74, 78, 79, 80, 80, 78];
-vec2=[69, 69, 73, 75, 79, 80, 79, 78, 76, 73, 72, 71, 70, 70, 69, 69, 69, 71, 73, 75, 76, 76, 76, 76, 76, 75, 73, 71, 70, 70, 71, 73, 75, 80, 80, 80, 78];
+vec1 = [71, 73, 75, 80, 80, 80, 78, 76, 75, 73, 71, 71, 71, 73, 75, 76, 76, 68, 76, 76, 75, 73, 71, 70, 70, 69, 68, 68, 72, 74, 78, 79, 80, 80, 78];
+vec2 = [69, 69, 73, 75, 79, 80, 79, 78, 76, 73, 72, 71, 70, 70, 69, 69, 69, 71, 73, 75, 76, 76, 76, 76, 76, 75, 73, 71, 70, 70, 71, 73, 75, 80, 80, 80, 78];
+
+#vec1 = npr.normal(0, 15, 80)
+#vec2 = npr.normal(4, 5, 100)
 
 t = np.array(vec1, np.double)
 r = np.array(vec2, np.double)
