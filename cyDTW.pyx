@@ -31,19 +31,20 @@ cdef class DTW:
 
     Parameters
     ----------
-    sequence1 : Numpy.ndarray[ndim=1, dtype=numpy.double]
-        A 1 dimensional sequence of points
-    sequence2 : Numpy.ndarray[ndim=1, dtype=numpy.double]
-        A 1 dimensional sequence of points
-    case : Enum type?
+    sequence1 : 1-D ndarray, dtype float64
+        A 1 dimensional sequence of points.
+    sequence2 : 1-D ndarray, dtype float64
+        A 1 dimensional sequence of points.
+    case : int, {1, 2, 3}
         Type-1 DTW uses 27-, 45- and 63-degree local path constraint.
         Type-2 DTW uses 0-, 45- and 90-degree local path constraint.
         Type-3 DTW uses a combination of Type-1 and Type-2
 
     References
     ----------
-    http://mirlab.org/jang/books/dcpr/dpDtw.asp?title=8-4%20Dynamic%20Time%20Warping
-    http://en.wikipedia.org/wiki/Dynamic_time_warping
+    .. [1] http://mirlab.org/jang/books/dcpr/dpDtw.asp?title=8-4%20Dynamic%20Time%20Warping
+    .. [2] http://en.wikipedia.org/wiki/Dynamic_time_warping
+
     """
 
     cdef int case
