@@ -42,6 +42,8 @@ for f, case in [(f1, 0), (f2, 1), (f3, 2)]:
 
 	if stretch:
 		stretch = float(len(t))/len(r)
+	else:
+		stretch = 1
 
 	ax = f.add_subplot(111, projection='3d')
 
@@ -57,7 +59,7 @@ for f, case in [(f1, 0), (f2, 1), (f3, 2)]:
 
 		i += 1
 
-	print dtw._dist_matrix
+	print np.array(dtw._dist_matrix[2:, 2:])
 
 plt.show()
 

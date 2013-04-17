@@ -12,7 +12,6 @@ cdef int type3 = 2
 cdef class DTW:
 	"""DTW(sequence1, sequence2, case=type1)
 
-	http://en.wikipedia.org/wiki/Dynamic_time_warping
 	Dynamic time warping (DTW) is an algorithm for measuring similarity
 	between two sequences which may vary in time or speed
 
@@ -35,6 +34,11 @@ cdef class DTW:
 		Type-1 DTW uses 27-, 45- and 63-degree local path constraint.
 		Type-2 DTW uses 0-, 45- and 90-degree local path constraint.
 		Type-3 DTW uses a combination of Type-1 and Type-2
+
+	References
+	----------
+	http://mirlab.org/jang/books/dcpr/dpDtw.asp?title=8-4%20Dynamic%20Time%20Warping
+	http://en.wikipedia.org/wiki/Dynamic_time_warping
 	"""
 
 	cdef int case
