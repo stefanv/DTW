@@ -1,6 +1,6 @@
 __author__ = 'marcdeklerk'
 
-from cyDTW import dtw
+from _dtw import dtw
 import numpy as np
 import numpy.random as npr
 import matplotlib.pyplot as plt

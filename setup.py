@@ -6,7 +6,7 @@ from Cython.Distutils import build_ext
 import numpy
 
 ext_modules = [
-    Extension("cyDTW", ["cyDTW.pyx"], include_dirs=[numpy.get_include()])
+    Extension("_dtw", ["_dtw.pyx"], include_dirs=[numpy.get_include()])
 ]
 
 setup(

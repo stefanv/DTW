@@ -1,6 +1,6 @@
 from __future__ import division
 
-from cyDTW import dtw
+from _dtw import dtw
 import numpy as np
 
 import time
