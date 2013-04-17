@@ -9,7 +9,34 @@ cdef int type1 = 0
 cdef int type2 = 1
 cdef int type3 = 2
 
-cdef class DTW(object):
+cdef class DTW:
+	"""DTW(sequence1, sequence2, case=type1)
+
+	http://en.wikipedia.org/wiki/Dynamic_time_warping
+	Dynamic time warping (DTW) is an algorithm for measuring similarity
+	between two sequences which may vary in time or speed
+
+	For instance, similarities in walking patterns would be detected,
+	even if in one video the person was walking slowly and if in another
+	he or she were walking more quickly, or even if there were accelerations
+	and decelerations during the course of one observation
+
+	After instantiating the class, use the method calculate() to perform the
+	matching and return the difference measure and get_path() to return the
+	matching.
+
+	Parameters
+	----------
+	sequence1 : Numpy.ndarray[ndim=1, dtype=numpy.double]
+		A 1 dimensional sequence of points
+	sequence2 : Numpy.ndarray[ndim=1, dtype=numpy.double]
+		A 1 dimensional sequence of points
+	case : Enum type?
+		Type-1 DTW uses 27-, 45- and 63-degree local path constraint.
+		Type-2 DTW uses 0-, 45- and 90-degree local path constraint.
+		Type-3 DTW uses a combination of Type-1 and Type-2
+	"""
+
 	cdef int case
 
 	cdef double[:] _seq1
@@ -42,14 +69,14 @@ cdef class DTW(object):
 		min_p, min_q = p-1, q-1
 		cost = self.dp_backwards(p-1, q-1)
 
-		if self.case == type1: #Type-1 DTW uses 27°-45°-63° local path constraint.
+		if self.case == type1 or self.case == type3:
 			cost2 = self.dp_backwards(p-2, q-1)
 			if cost2 < cost: min_p, min_q, cost = p-2, q-1, cost2
 
 			cost2 = self.dp_backwards(p-1, q-2)
 			if cost2 < cost: min_p, min_q, cost = p-1, q-2, cost2
 
-		if self.case == type2: #Type-2 DTW uses 0°-45°-90° local path constraint.
+		if self.case == type2 or self.case == type3:
 			cost2 = self.dp_backwards(p-1, q)
 			if cost2 < cost: min_p, min_q, cost = p-1, q, cost2
 
@@ -78,14 +105,14 @@ cdef class DTW(object):
 			min_p, min_q = p-1, q-1
 			cost = self.dp_backwards(p-1, q-1)
 
-			if self.case == type1: #Type-1 DTW uses 27°-45°-63° local path constraint.
+			if self.case == type1 or self.case == type3:
 				cost2 = self.dp_backwards(p-2, q-1)
 				if cost2 < cost: min_p, min_q, cost = p-2, q-1, cost2
 
 				cost2 = self.dp_backwards(p-1, q-2)
 				if cost2 < cost: min_p, min_q, cost = p-1, q-2, cost2
 
-			if self.case == type2: #Type-2 DTW uses 0°-45°-90° local path constraint.
+			if self.case == type2 or self.case == type3:
 				cost2 = self.dp_backwards(p-1, q)
 				if cost2 < cost: min_p, min_q, cost = p-1, q, cost2
 
