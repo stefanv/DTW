@@ -1,20 +1,32 @@
-# cython: boundscheck=False
-# cython: cdivision=True
-# cython: nonecheck=False
-# cython: wraparound=False
-
-__author__ = 'marcdeklerk'
-
 cdef extern from "float.h":
     double DBL_MAX
 
-from cython.view cimport array as cvarray
+cdef extern from "math.h":
+    double sqrt(double)
 
-cdef int type1 = 0
-cdef int type2 = 1
-cdef int type3 = 2
+import numpy as np
 
-cdef class DTW:
+
+cdef int type1 = 1
+cdef int type2 = 2
+cdef int type3 = 3
+
+
+cdef inline double euclidean(double x, double y):
+    return sqrt((x - y) * (x - y))
+
+
+cdef inline double min3(double[3] v):
+    cdef int i, m = 0
+
+    for i in range(1, 3):
+        if v[i] < v[m]:
+            m = i
+
+    return v[m]
+
+
+def dtw(double[:] x, double[:] y, int case=1):
     """DTW(sequence1, sequence2, case=type1)
 
     Dynamic time warping (DTW) is an algorithm for measuring similarity
@@ -31,10 +43,10 @@ cdef class DTW:
 
     Parameters
     ----------
-    sequence1 : 1-D ndarray, dtype float64
-        A 1 dimensional sequence of points.
-    sequence2 : 1-D ndarray, dtype float64
-        A 1 dimensional sequence of points.
+    x : 1-D ndarray, dtype float64
+        A 1-dimensional sequence of points.
+    y : 1-D ndarray, dtype float64
+        A 1-dimensional sequence of points.
     case : int, {1, 2, 3}
         Type-1 DTW uses 27-, 45- and 63-degree local path constraint.
         Type-2 DTW uses 0-, 45- and 90-degree local path constraint.
@@ -46,92 +58,46 @@ cdef class DTW:
     .. [2] http://en.wikipedia.org/wiki/Dynamic_time_warping
 
     """
+    cdef:
+        int m = len(x)
+        int n = len(y)
+        double[:, ::1] distance
+        int i, j, min_i, min_j
+        double[3] costs
+        double prev_cost
 
-    cdef int case
+    distance = np.zeros((m + 1, n + 1)) + DBL_MAX
+    distance[1, 1] = 0
 
-    cdef double[:] _seq1
-    cdef double[:] _seq2
+    # Step forward
+    for i in range(2, m + 1):
+        for j in range(2, n + 1):
+            # Could limit the fan here and save some time
 
-    cdef readonly double[:, :] _dist_matrix
+            costs[0] = distance[i - 1, j - 1]
+            costs[1] = distance[i - 2, j - 1]
+            costs[2] = distance[i - 1, j - 2]
 
-    def __cinit__(self, double[:] seq1, double[:] seq2, int case=type1):
-        self._seq1 = seq1
-        self._seq2 = seq2
-        self.case = case
+            distance[i, j] = euclidean(x[i - 1], y[j - 1]) + min3(costs)
 
-        self._dist_matrix = cvarray(shape=(2+len(seq1), 2+len(seq2)), itemsize=sizeof(double), format="d")
+    # Trace back
+    cdef list path = [(m - 1, n - 1)]
 
-        self._dist_matrix[:] = -1
-        self._dist_matrix[2:seq1.shape[0]+2, 0:2] = DBL_MAX
-        self._dist_matrix[0:2, 2:seq2.shape[0]+2] = DBL_MAX
-        self._dist_matrix[0:2, 0:2] = 0
+    i = m
+    j = n
+    while not ((i == 1) and (j == 1)):
+        path.append((i - 1, j - 1))
 
-    cdef inline double dp_backwards(self, int p, int q) except *:
-        if p == 0 and q == 0:
-            pass
+        min_i, min_j = i - 1, j - 1
 
-        if self._dist_matrix[2+p, 2+q] != -1:
-            return self._dist_matrix[2+p, 2+q]
+        if distance[i - 2, j - 1] < distance[min_i, min_j]:
+            min_i, min_j = i - 2, j - 1
 
-        cdef int min_p, min_q
-        cdef double cost
+        if distance[i - 1, j - 2] < distance[min_i, min_j]:
+            min_i, min_j = i - 1, j - 2
 
-        min_p, min_q = p-1, q-1
-        cost = self.dp_backwards(p-1, q-1)
+        i, j = min_i, min_j
 
-        if self.case == type1 or self.case == type3:
-            cost2 = self.dp_backwards(p-2, q-1)
-            if cost2 < cost: min_p, min_q, cost = p-2, q-1, cost2
+    path.append((0, 0))
 
-            cost2 = self.dp_backwards(p-1, q-2)
-            if cost2 < cost: min_p, min_q, cost = p-1, q-2, cost2
-
-        if self.case == type2 or self.case == type3:
-            cost2 = self.dp_backwards(p-1, q)
-            if cost2 < cost: min_p, min_q, cost = p-1, q, cost2
-
-            cost2 = self.dp_backwards(p, q-1)
-            if cost2 < cost: min_p, min_q, cost = p, q-1, cost2
-
-        self._dist_matrix[2+p, 2+q] = self.distance(self._seq1[p], self._seq2[q]) + self.dp_backwards(min_p, min_q)
-
-        return self._dist_matrix[2+p, 2+q]
-
-    def calculate(self):
-        return self.dp_backwards(self._seq1.shape[0]-1, self._seq2.shape[0]-1)
-
-    def get_path(self):
-        cdef int p = self._seq1.shape[0]-1
-        cdef int q = self._seq2.shape[0]-1
-
-        path = []
-
-        cdef int min_p, min_q
-        cdef double cost, cost2
-
-        while p != -1 and q != -1:
-            path.append((p, q))
-
-            min_p, min_q = p-1, q-1
-            cost = self.dp_backwards(p-1, q-1)
-
-            if self.case == type1 or self.case == type3:
-                cost2 = self.dp_backwards(p-2, q-1)
-                if cost2 < cost: min_p, min_q, cost = p-2, q-1, cost2
-
-                cost2 = self.dp_backwards(p-1, q-2)
-                if cost2 < cost: min_p, min_q, cost = p-1, q-2, cost2
-
-            if self.case == type2 or self.case == type3:
-                cost2 = self.dp_backwards(p-1, q)
-                if cost2 < cost: min_p, min_q, cost = p-1, q, cost2
-
-                cost2 = self.dp_backwards(p, q-1)
-                if cost2 < cost: min_p, min_q, cost = p, q-1, cost2
-
-            p, q = min_p, min_q
-
-        return path
-
-    cdef inline double distance(self, double x, double y):
-        return x-y if x > y else y -x
+    return path, np.asarray(distance)
